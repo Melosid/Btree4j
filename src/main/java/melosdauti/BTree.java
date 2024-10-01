@@ -53,11 +53,14 @@ public class BTree {
           pg.setCells(new ArrayList<>(chld.getCells()));
           pg.setIsInit(0);
           pg.init(null);
+          pager.free(chld.getPgno());
         }
+        pg.writeDisk();
         pager.save(pg);
         return;
       }
       if (!pg.isOverfull()) {
+        pg.writeDisk();
         pager.save(pg);
         return;
       }
@@ -72,11 +75,8 @@ public class BTree {
       pager.save(pg);
       parent = pg;
       pg = chld;
-      pg.writeDisk();
-      pager.save(pg);
     }
 
-    // find idx?!
     for (idx = 0; idx < parent.getCells().size(); idx++) {
       if (parent.getCells().get(idx).getLeftChild() == pg.getRightChild()) {
         break;
@@ -93,19 +93,27 @@ public class BTree {
     for (i = 0, k = nxDiv; i < NB; i++, k++) {
       if (k < parent.getCells().size()) {
         div.add(i, parent.getCells().get(k));
-        int lChld = div.get(i).getLeftChild();
-        pgOld.add(i, pager.get(lChld));
-        pgOld.get(i).init(parent);
+        int pgnoLChld = div.get(i).getLeftChild();
+        Page lChld = pager.get(pgnoLChld);
+        lChld.init(parent);
+        pgOld.add(i, lChld);
       } else if (k == parent.getCells().size()) {
-        int rChld = parent.getRightChild();
-        pgOld.add(i, pager.get(rChld));
-        pgOld.get(i).init(parent);
+        int pgnoRChld = parent.getRightChild();
+        if (pgnoRChld == pg.getPgno()) {
+          pgOld.add(pg);
+        } else {
+          Page rChld = pager.get(pgnoRChld);
+          rChld.init(parent);
+          pgOld.add(i, rChld);
+        }
       } else {
         break;
       }
     }
 
-
+    System.out.println("pg.getCells(): " + pg.getCells());
+    System.out.println("pgOld: " + pgOld);
+    System.out.println("~~~~~~~~~~~~~~~~");
 
     for (i = 0; i < pgOld.size(); i++ ) {
       Page old = pgOld.get(i);
@@ -118,6 +126,8 @@ public class BTree {
         cells.get(cells.size() - 1).setLeftChild(old.getRightChild());
       }
     }
+
+    System.out.println("cells: " + cells);
 
     int subtotal;
 
@@ -183,8 +193,6 @@ public class BTree {
     parent.writeDisk();
     pager.save(parent);
 
-    System.out.println("cells: " + cells);
-
     // testing
     Page one = pager.get(1);
     one.readDisk();
@@ -211,7 +219,8 @@ public class BTree {
     Cell cll = new Cell(0, key, value);
     pg.getCells().add(cll);
     Collections.sort(pg.getCells());
-    pg.writeDisk();
+    System.out.println("pg on insert: " + pg);
+//    pg.writeDisk();
     balance();
   }
 
