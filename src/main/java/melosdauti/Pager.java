@@ -32,7 +32,6 @@ public class Pager {
     Page page = new Page();
     page.setDisk(data);
     page.setPgno(pgno);
-    System.out.println("allocate:" + page);
     return page;
   }
 
@@ -79,10 +78,6 @@ public class Pager {
   }
 
   public Page get(int pgno) throws IOException {
-    System.out.println("pgno: " + pgno);
-    if (pgno >= nextFreePgno()) {
-      System.out.println("not allocated yet: " + pgno);
-    }
     raf.seek((long) pgno * PAGE_SIZE);
     byte[] data = new byte[PAGE_SIZE];
     raf.read(data);
@@ -105,6 +100,5 @@ public class Pager {
   public void free(int pgno) throws IOException {
     raf.seek((long) pgno * PAGE_SIZE);
     raf.write(new byte[PAGE_SIZE]);
-    System.out.println("free:" + pgno);
   }
 }

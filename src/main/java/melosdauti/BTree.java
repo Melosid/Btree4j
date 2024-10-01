@@ -94,9 +94,13 @@ public class BTree {
       if (k < parent.getCells().size()) {
         div.add(i, parent.getCells().get(k));
         int pgnoLChld = div.get(i).getLeftChild();
-        Page lChld = pager.get(pgnoLChld);
-        lChld.init(parent);
-        pgOld.add(i, lChld);
+        if (pgnoLChld == pg.getPgno()) {
+          pgOld.add(pg);
+        } else {
+          Page lChld = pager.get(pgnoLChld);
+          lChld.init(parent);
+          pgOld.add(i, lChld);
+        }
       } else if (k == parent.getCells().size()) {
         int pgnoRChld = parent.getRightChild();
         if (pgnoRChld == pg.getPgno()) {
@@ -111,10 +115,6 @@ public class BTree {
       }
     }
 
-    System.out.println("pg.getCells(): " + pg.getCells());
-    System.out.println("pgOld: " + pgOld);
-    System.out.println("~~~~~~~~~~~~~~~~");
-
     for (i = 0; i < pgOld.size(); i++ ) {
       Page old = pgOld.get(i);
       for (j = 0; j < old.getCells().size(); j++) {
@@ -126,8 +126,6 @@ public class BTree {
         cells.get(cells.size() - 1).setLeftChild(old.getRightChild());
       }
     }
-
-    System.out.println("cells: " + cells);
 
     int subtotal;
 
@@ -192,6 +190,17 @@ public class BTree {
     }
     parent.writeDisk();
     pager.save(parent);
+  }
+
+  public void insert(String key, String value) throws IOException {
+    moveToRoot();
+    moveTo(key);
+
+    Page pg = cur.getPage();
+    Cell cll = new Cell(0, key, value);
+    pg.getCells().add(cll);
+    Collections.sort(pg.getCells());
+    balance();
 
     // testing
     Page one = pager.get(1);
@@ -210,20 +219,6 @@ public class BTree {
     System.out.println("three cells size: " + three.getCells().size());
   }
 
-  public void insert(String key, String value) throws IOException {
-    moveToRoot();
-    moveTo(key);
-
-    Page pg = cur.getPage();
-    pg.init(null);
-    Cell cll = new Cell(0, key, value);
-    pg.getCells().add(cll);
-    Collections.sort(pg.getCells());
-    System.out.println("pg on insert: " + pg);
-//    pg.writeDisk();
-    balance();
-  }
-
   public void delete(String key) throws IOException {
     moveToRoot();
     moveTo(key);
@@ -233,10 +228,13 @@ public class BTree {
 
   public void moveTo(String key) throws IOException {
     Page pg = cur.getPage();
+    pg.init(null);
     int chldPgno;
-    int idx;
+    int idx = 0;
     int lwr = 0;
     int upr = pg.getCells().size() - 1;
+    System.out.println("/////////////////");
+    System.out.println("key: " + key);
 
     while (lwr <= upr) {
       idx = (lwr + upr) / 2;
@@ -251,13 +249,18 @@ public class BTree {
         upr = idx - 1;
       }
     }
+    System.out.println("idx" + idx);
     if (lwr >= pg.getCells().size()) {
       chldPgno = pg.getRightChild();
+      System.out.println("moving to right: " + chldPgno);
     } else {
       chldPgno = pg.getCells().get(lwr).getLeftChild();
+      System.out.println("moving to left: " + chldPgno);
     }
     cur.setIdx(lwr);
     if (chldPgno == 0) {
+      System.out.println("moveTo end pgno: " + pg.getPgno());
+      System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!");
       return;
     }
     Page chld = pager.get(chldPgno);

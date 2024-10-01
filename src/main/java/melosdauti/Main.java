@@ -8,7 +8,7 @@ public class Main {
     String fp = "/home/melos/study/database";
     BTree bTree = new BTree(fp);
 
-    for (int i=1; i <= 10; i++) {
+    for (int i=1; i <= 16; i++) {
       String key = String.valueOf(i);
       String data = "The string that I want to save with key " + key;
       bTree.insert(key, data);
