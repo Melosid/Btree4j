@@ -45,7 +45,6 @@ public class Page implements Comparable<Page>{
 
     parent = prnt;
     isInit = 1;
-
     readDisk();
   }
 
@@ -57,7 +56,7 @@ public class Page implements Comparable<Page>{
 
     int offset = 0;
 
-    while (offset < bCells.length) {
+    while (offset + CELL_HDR < bCells.length) {
       byte[] bLchld = Arrays.copyOfRange(bCells, offset + LEFT_CHILD_START, offset + LEFT_CHILD_END);
       byte[] bNKey = Arrays.copyOfRange(bCells, offset + NKEY_START, offset + NKEY_END);
       byte[] bNData = Arrays.copyOfRange(bCells, offset + NDATA_START, offset + NDATA_END);

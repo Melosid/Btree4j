@@ -16,7 +16,6 @@ public class Pager {
   public Pager(String fp) throws IOException {
     File file = new File(fp);
     raf = new RandomAccessFile(file, "rw");
-    raf.setLength(0);
   }
 
   public int nextFreePgno() throws IOException {
@@ -100,5 +99,9 @@ public class Pager {
   public void free(int pgno) throws IOException {
     raf.seek((long) pgno * PAGE_SIZE);
     raf.write(new byte[PAGE_SIZE]);
+  }
+
+  public void reset() throws IOException {
+    raf.setLength(0);
   }
 }

@@ -18,6 +18,7 @@ public class BTree {
 
   public BTree(String fp) throws IOException {
     pager = new Pager(fp);
+    pager.reset();
     cur = new Cursor();
     if (!pager.getZero()) {
       pager.setZero();
@@ -201,22 +202,6 @@ public class BTree {
     pg.getCells().add(cll);
     Collections.sort(pg.getCells());
     balance();
-
-    // testing
-    Page one = pager.get(1);
-    one.readDisk();
-    Page two = pager.get(2);
-    two.readDisk();
-    Page three = pager.get(3);
-    three.readDisk();
-
-    System.out.println("one: " + one);
-    System.out.println("two: " + two);
-    System.out.println("three: " + three);
-
-    System.out.println("one cells size: " + one.getCells().size());
-    System.out.println("two cells size: " + two.getCells().size());
-    System.out.println("three cells size: " + three.getCells().size());
   }
 
   public void delete(String key) throws IOException {
@@ -264,6 +249,7 @@ public class BTree {
       return;
     }
     Page chld = pager.get(chldPgno);
+    System.out.println("chld: " + chld);
     chld.init(pg);
     cur.setPage(chld);
     moveTo(key);
