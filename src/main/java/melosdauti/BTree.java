@@ -1,12 +1,10 @@
 package melosdauti;
 
-import static melosdauti.Page.MX_CELL;
 import static melosdauti.Page.PAGE_SIZE;
 import static melosdauti.Page.USABLE_SPACE;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,14 +32,10 @@ public class BTree {
     int idx;
     int nxDiv;
     List<Cell> div = new ArrayList<>();
-    int[] idxDiv = new int[NB];
-    int[] pgnoOld = new int[NB];
     List<Page> pgOld = new ArrayList<>();
-    List<Page> copyPgOld = new ArrayList<>();
     List<Cell> cells = new ArrayList<>();
     int[] szNew = new int[NB + 1];
     int[] cntNew = new int[NB + 1];
-    int[] pgnoNew = new int[NB + 1];
     List<Page> pgNew = new ArrayList<>();
 
     if (!pg.isOverfull() && pg.bFree() < PAGE_SIZE / 2 && pg.getCells().size() >= 2) {
@@ -99,15 +93,16 @@ public class BTree {
     for (i = 0, k = nxDiv; i < NB; i++, k++) {
       if (k < parent.getCells().size()) {
         div.add(i, parent.getCells().get(k));
-        idxDiv[i] = k;
-        pgnoOld[i] = div.get(i).getLeftChild();
+        int lChld = div.get(i).getLeftChild();
+        pgOld.add(i, pager.get(lChld));
+        pgOld.get(i).init(parent);
       } else if (k == parent.getCells().size()) {
-        pgnoOld[i] = parent.getRightChild();
+        int rChld = parent.getRightChild();
+        pgOld.add(i, pager.get(rChld));
+        pgOld.get(i).init(parent);
       } else {
         break;
       }
-      pgOld.add(i, pager.get(pgnoOld[i]));
-      pgOld.get(i).init(parent);
     }
 
 
@@ -150,7 +145,6 @@ public class BTree {
       if (i < pgOld.size()) {
         pgNew.add(i, pgOld.get(i));
         pgNew.get(i).setCells(new ArrayList<>());
-        pgnoNew[i] = pgnoOld[i];
       } else {
         pgNew.add(i, pager.allocate());
       }
@@ -168,18 +162,18 @@ public class BTree {
       }
       if (i < pgNew.size() - 1 && j < cells.size()) {
         pgn.setRightChild(cells.get(j).getLeftChild());
-        cells.get(j).setLeftChild(pgnoNew[i]);
+        cells.get(j).setLeftChild(pgNew.get(i).getPgno());
         parent.getCells().add(nxDiv, cells.get(j));
         j++;
         nxDiv++;
       }
     }
 
-    pgNew.get(pgNew.size() - 1).setRightChild(pgOld.get(pgOld.size() - 1).getRightChild());
+    pgNew.getLast().setRightChild(pgOld.getLast().getRightChild());
     if (nxDiv == parent.getCells().size()) {
-      parent.setRightChild(pgnoNew[pgNew.size() - 1]);
+      parent.setRightChild(pgNew.getLast().getPgno());
     } else {
-      parent.getCells().get(nxDiv).setLeftChild(pgnoNew[pgNew.size() - 1]);
+      parent.getCells().get(nxDiv).setLeftChild(pgNew.getLast().getPgno());
     }
 
     for (Page page: pgNew) {

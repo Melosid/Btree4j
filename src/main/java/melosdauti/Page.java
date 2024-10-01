@@ -22,6 +22,8 @@ public class Page implements Comparable<Page>{
   static final int FREE_CELL_BYTE_IDX = 0;
   static final int RIGHT_CHILD_START = 0;
   static final int RIGHT_CHILD_END = Integer.BYTES;
+  static final int LEFT_CHILD_START = 0;
+  static final int LEFT_CHILD_END = Integer.BYTES;
   static final int NKEY_START = Integer.BYTES;
   static final int NKEY_END = 2 * Integer.BYTES;
   static final int NDATA_START =  2 * Integer.BYTES;
@@ -56,8 +58,10 @@ public class Page implements Comparable<Page>{
     int offset = 0;
 
     while (offset < bCells.length) {
+      byte[] bLchld = Arrays.copyOfRange(bCells, offset + LEFT_CHILD_START, offset + LEFT_CHILD_END);
       byte[] bNKey = Arrays.copyOfRange(bCells, offset + NKEY_START, offset + NKEY_END);
       byte[] bNData = Arrays.copyOfRange(bCells, offset + NDATA_START, offset + NDATA_END);
+      int lChld = ByteBuffer.wrap(bLchld).getInt();
       int nKey = ByteBuffer.wrap(bNKey).getInt();
       int nData = ByteBuffer.wrap(bNData).getInt();
 
@@ -70,7 +74,7 @@ public class Page implements Comparable<Page>{
       if (nData != 0) {
         String key = new String(Arrays.copyOfRange(bCells, keyIdx, keyIdx + nKey));
         String value = new String(Arrays.copyOfRange(bCells, dataIdx, dataIdx + nData));
-        Cell cell = new Cell(0, key, value);
+        Cell cell = new Cell(lChld, key, value);
         cells.add(cell);
       }
       offset = offset + CELL_HDR + nKey + nData;
@@ -100,10 +104,6 @@ public class Page implements Comparable<Page>{
   public int bFree() throws IOException {
     writeDisk();
     return PAGE_SIZE - disk.length;
-  }
-
-  public void zero() {
-    cells.clear();
   }
 
   @Override
