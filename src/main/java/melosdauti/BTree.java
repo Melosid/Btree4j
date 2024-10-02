@@ -48,18 +48,11 @@ public class BTree {
 
     if (parent == null) {
       Page chld;
-      if (pg.getCells().size() == 0) {
-        pager.save(pg);
-        return;
-      }
       if (!pg.isOverfull()) {
         pager.save(pg);
         return;
       }
-      chld = pager.get(pg.getRightChild());
-      if (chld == null) {
-        chld = pager.allocate();
-      }
+      chld = pager.allocate();
       chld.setCells(new ArrayList<>(pg.getCells()));
       chld.setRightChild(pg.getRightChild());
       chld.setParent(pg);
