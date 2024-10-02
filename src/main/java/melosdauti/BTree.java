@@ -116,7 +116,7 @@ public class BTree {
       if (i < pgOld.size() - 1) {
         cells.add(div.get(i));
         parent.getCells().remove(nxDiv);
-        cells.get(cells.size() - 1).setLeftChild(old.getRightChild());
+        cells.getLast().setLeftChild(old.getRightChild());
       }
     }
 
@@ -240,7 +240,6 @@ public class BTree {
       return;
     }
     Page chld = pager.get(chldPgno);
-    System.out.println("chld: " + chld);
     chld.init(pg);
     cur.setPage(chld);
     moveTo(key);
