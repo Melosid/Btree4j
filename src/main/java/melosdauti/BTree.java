@@ -85,11 +85,10 @@ public class BTree {
           pgOld.add(pg);
         } else {
           Page lChld = pager.get(pgnoLChld);
-          if (lChld == null) {
-            lChld = pager.allocate();
+          if (lChld != null) {
+            lChld.init(parent);
+            pgOld.add(i, lChld);
           }
-          lChld.init(parent);
-          pgOld.add(i, lChld);
         }
       } else if (k == parent.getCells().size()) {
         int pgnoRChld = parent.getRightChild();
@@ -97,11 +96,10 @@ public class BTree {
           pgOld.add(pg);
         } else {
           Page rChld = pager.get(pgnoRChld);
-          if (rChld == null) {
-            rChld = pager.allocate();
+          if (rChld != null) {
+            rChld.init(parent);
+            pgOld.add(i, rChld);
           }
-          rChld.init(parent);
-          pgOld.add(i, rChld);
         }
       } else {
         break;
