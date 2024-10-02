@@ -73,6 +73,7 @@ public class BTree {
       pg.getCells().clear();
       pg.setRightChild(chld.getPgno());
       pg.writeDisk();
+      pg.setParent(parent);
       pager.save(pg);
       parent = pg;
       pg = chld;
@@ -191,6 +192,8 @@ public class BTree {
     }
     parent.writeDisk();
     pager.save(parent);
+    cur.setPage(parent);
+    balance();
   }
 
   public void insert(String key, String value) throws IOException {

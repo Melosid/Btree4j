@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public class Page implements Comparable<Page>{
 
-  static final int PAGE_SIZE = 512;
+  static final int PAGE_SIZE = 256;
   static final int PAGE_HDR = 1 * Integer.BYTES;
   static final int CELL_HDR = 3 * Integer.BYTES;
   static final int MIN_CELL_SIZE = CELL_HDR + Integer.BYTES;
