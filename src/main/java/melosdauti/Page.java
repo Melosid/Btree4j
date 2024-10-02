@@ -81,6 +81,11 @@ public class Page implements Comparable<Page>{
   }
 
   public void writeDisk() throws IOException {
+    byte[] result = getBytes();
+    disk = result;
+  }
+
+  public byte[] getBytes() throws IOException {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
 
     byte[] bRChld = ByteBuffer.allocate(Integer.BYTES).putInt(rightChild).array();
@@ -91,18 +96,15 @@ public class Page implements Comparable<Page>{
     }
 
     os.close();
-    byte[] result = os.toByteArray();
-    disk = result;
+    return os.toByteArray();
   }
 
   public boolean isOverfull() throws IOException {
-    writeDisk();
-    return disk.length > USABLE_SPACE;
+    return getBytes().length > USABLE_SPACE;
   }
 
   public int bFree() throws IOException {
-    writeDisk();
-    return PAGE_SIZE - disk.length;
+    return PAGE_SIZE - getBytes().length;
   }
 
   @Override

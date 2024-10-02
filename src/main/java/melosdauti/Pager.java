@@ -77,6 +77,9 @@ public class Pager {
   }
 
   public Page get(int pgno) throws IOException {
+    if (pgno == 0) {
+      return null;
+    }
     raf.seek((long) pgno * PAGE_SIZE);
     byte[] data = new byte[PAGE_SIZE];
     raf.read(data);
@@ -88,6 +91,7 @@ public class Pager {
 
   public void save(Page page) throws IOException {
     int pgno = page.getPgno();
+    page.writeDisk();
     raf.seek((long) pgno * PAGE_SIZE);
     byte[] result = new byte[PAGE_SIZE];
     int bLength = page.getDisk().length;

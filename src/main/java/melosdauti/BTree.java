@@ -49,23 +49,23 @@ public class BTree {
     if (parent == null) {
       Page chld;
       if (pg.getCells().size() == 0) {
-        pg.writeDisk();
         pager.save(pg);
         return;
       }
       if (!pg.isOverfull()) {
-        pg.writeDisk();
         pager.save(pg);
         return;
       }
-      chld = pager.allocate();
+      chld = pager.get(pg.getRightChild());
+      if (chld == null) {
+        chld = pager.allocate();
+      }
       chld.setCells(new ArrayList<>(pg.getCells()));
       chld.setRightChild(pg.getRightChild());
       chld.setParent(pg);
       chld.setIsInit(1);
       pg.getCells().clear();
       pg.setRightChild(chld.getPgno());
-      pg.writeDisk();
       pg.setParent(parent);
       pager.save(pg);
       parent = pg;
@@ -93,6 +93,9 @@ public class BTree {
           pgOld.add(pg);
         } else {
           Page lChld = pager.get(pgnoLChld);
+          if (lChld == null) {
+            lChld = pager.allocate();
+          }
           lChld.init(parent);
           pgOld.add(i, lChld);
         }
@@ -102,6 +105,9 @@ public class BTree {
           pgOld.add(pg);
         } else {
           Page rChld = pager.get(pgnoRChld);
+          if (rChld == null) {
+            rChld = pager.allocate();
+          }
           rChld.init(parent);
           pgOld.add(i, rChld);
         }
@@ -180,10 +186,8 @@ public class BTree {
     }
 
     for (Page page: pgNew) {
-      page.writeDisk();
       pager.save(page);
     }
-    parent.writeDisk();
     pager.save(parent);
     cur.setPage(parent);
     balance();
