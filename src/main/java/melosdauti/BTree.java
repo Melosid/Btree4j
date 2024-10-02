@@ -65,7 +65,7 @@ public class BTree {
     }
 
     for (idx = 0; idx < parent.getCells().size(); idx++) {
-      if (parent.getCells().get(idx).getLeftChild() == pg.getRightChild()) {
+      if (parent.getCells().get(idx).getLeftChild() == pg.getPgno()) {
         break;
       }
     }
