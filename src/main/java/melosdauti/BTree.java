@@ -152,7 +152,6 @@ public class BTree {
       pgNew.get(i).setIsInit(1);
     }
 
-    pgNew.sort(Page::compareTo);
 
     j = 0;
     for (i = 0; i < pgNew.size(); i++) {
