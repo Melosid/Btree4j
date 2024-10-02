@@ -60,7 +60,6 @@ public class BTree {
       pg.getCells().clear();
       pg.setRightChild(chld.getPgno());
       pg.setParent(parent);
-      pager.save(pg);
       parent = pg;
       pg = chld;
     }
