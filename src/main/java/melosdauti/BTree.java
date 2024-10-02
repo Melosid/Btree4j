@@ -49,13 +49,6 @@ public class BTree {
     if (parent == null) {
       Page chld;
       if (pg.getCells().size() == 0) {
-        if (pg.getRightChild() != 0) {
-          chld = pager.get(pg.getRightChild());
-          pg.setCells(new ArrayList<>(chld.getCells()));
-          pg.setIsInit(0);
-          pg.init(null);
-          pager.free(chld.getPgno());
-        }
         pg.writeDisk();
         pager.save(pg);
         return;
