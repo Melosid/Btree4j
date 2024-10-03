@@ -180,7 +180,7 @@ public class BTree {
     return page;
   }
 
-  public void insert(String key, String value) {
+  public void insert(int key, String value) {
     Page root = storage.get(1);
 
     Page pg = moveTo(key, root);
@@ -190,12 +190,12 @@ public class BTree {
     balance(pg);
   }
 
-  public Page moveTo(String key, Page root) {
+  public Page moveTo(int key, Page root) {
     for (Cell cell : root.getCells()) {
-      if (cell.getKey().equals(key)) {
+      if (key == cell.getKey()) {
         return root;
       }
-      if (Integer.valueOf(key).compareTo(Integer.valueOf(cell.getKey())) < 0) {
+      if (key - cell.getKey() < 0) {
         if (cell.getLeftChild() != 0) {
           Page chld = storage.get(cell.getLeftChild());
           chld.setParent(root);

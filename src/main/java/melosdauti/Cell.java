@@ -3,7 +3,6 @@ package melosdauti;
 import static melosdauti.Page.MX_LOCAL_PAYLOAD;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 public class Cell implements Comparable<Cell> {
@@ -13,11 +12,11 @@ public class Cell implements Comparable<Cell> {
   private int nKey;
   private int nData;
 
-  private String key;
+  private int key;
   private String data;
 
-  public Cell(int leftChild, String key, String data) {
-    nKey = key.getBytes().length;
+  public Cell(int leftChild, int key, String data) {
+    nKey = 4;
     nData = data.getBytes().length;
     if (nKey + nData > MX_LOCAL_PAYLOAD) {
       throw new RuntimeException("payload is too large");
@@ -34,9 +33,9 @@ public class Cell implements Comparable<Cell> {
 
   @Override
   public int compareTo(Cell cll) {
-    if (Integer.valueOf(key).compareTo(Integer.valueOf(cll.key)) < 0) {
+    if (key - cll.key < 0) {
       return -1;
-    } else if (Integer.valueOf(key).compareTo(Integer.valueOf(cll.key)) > 0) {
+    } else if (key - cll.key > 0) {
       return 1;
     }
     return 0;

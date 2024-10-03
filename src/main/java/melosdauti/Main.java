@@ -9,7 +9,7 @@ public class Main {
         20, 30};
 
     for (int i = 1; i <= nums.length; i++) {
-      String key = String.valueOf(nums[i - 1]);
+      int key = nums[i - 1];
       String data = "The string that I want to save with key " + key;
       bTree.insert(key, data);
     }
