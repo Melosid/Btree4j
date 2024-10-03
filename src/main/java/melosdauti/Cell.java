@@ -54,9 +54,9 @@ public class Cell implements Comparable<Cell> {
 
   @Override
   public int compareTo(Cell cll) {
-    if (key.compareTo(cll.key) < 0) {
+    if (Integer.valueOf(key).compareTo(Integer.valueOf(cll.key)) < 0) {
       return -1;
-    } else if (key.compareTo(cll.key) > 0) {
+    } else if (Integer.valueOf(key).compareTo(Integer.valueOf(cll.key)) > 0) {
       return 1;
     }
     return 0;

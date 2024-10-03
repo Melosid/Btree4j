@@ -203,44 +203,26 @@ public class BTree {
   public void moveTo(String key) throws IOException {
     Page pg = cur.getPage();
     pg.init(null);
-    int chldPgno;
-    int idx = 0;
-    int lwr = 0;
-    int upr = pg.getCells().size() - 1;
     System.out.println("/////////////////");
     System.out.println("key: " + key);
 
-    while (lwr <= upr) {
-      idx = (lwr + upr) / 2;
-      Cell cell = pg.getCells().get(idx);
-      if (cell.getKey().compareTo(key) == 0) {
-        cur.setIdx(idx);
+    for (Cell cell: pg.getCells()) {
+      if (cell.getKey().equals(key)) {
         return;
       }
-      if (cell.getKey().compareTo(key) < 0) {
-        lwr = idx + 1;
-      } else if (cell.getKey().compareTo(key) > 0) {
-        upr = idx - 1;
+      if (cell.getKey().compareTo(key) > 0 && cell.getLeftChild() != 0) {
+        Page chld = pager.get(cell.getLeftChild());
+        chld.init(pg);
+        cur.setPage(chld);
+        moveTo(key);
       }
     }
-    System.out.println("idx" + idx);
-    if (lwr >= pg.getCells().size()) {
-      chldPgno = pg.getRightChild();
-      System.out.println("moving to right: " + chldPgno);
-    } else {
-      chldPgno = pg.getCells().get(lwr).getLeftChild();
-      System.out.println("moving to left: " + chldPgno);
+    if (pg.getRightChild() != 0) {
+      Page chld = pager.get(pg.getRightChild());
+      chld.init(pg);
+      cur.setPage(chld);
+      moveTo(key);
     }
-    cur.setIdx(lwr);
-    if (chldPgno == 0) {
-      System.out.println("moveTo end pgno: " + pg.getPgno());
-      System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!");
-      return;
-    }
-    Page chld = pager.get(chldPgno);
-    chld.init(pg);
-    cur.setPage(chld);
-    moveTo(key);
   }
 
   private void moveToRoot() throws IOException {
