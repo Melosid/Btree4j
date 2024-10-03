@@ -2,14 +2,9 @@ package melosdauti;
 
 import static melosdauti.Page.MX_LOCAL_PAYLOAD;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
 @Data
 public class Cell implements Comparable<Cell> {
 
