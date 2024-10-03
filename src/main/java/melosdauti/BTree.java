@@ -138,13 +138,15 @@ public class BTree {
     }
 
     for (i = 0; i < k; i++) {
+      Page n = new Page();
       if (i < pgOld.size()) {
-        pgNew.add(i, pgOld.get(i));
-        pgNew.get(i).setCells(new ArrayList<>());
+        Page o = pgOld.get(i);
+        n.setPgno(o.getPgno());
       } else {
-        pgNew.add(i, pager.allocate());
+        n = pager.allocate();
       }
-      pgNew.get(i).setIsInit(1);
+      n.setIsInit(1);
+      pgNew.add(n);
     }
 
 
