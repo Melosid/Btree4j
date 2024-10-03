@@ -202,19 +202,20 @@ public class BTree {
 
   public void moveTo(String key) throws IOException {
     Page pg = cur.getPage();
-    pg.init(null);
-    System.out.println("/////////////////");
-    System.out.println("key: " + key);
 
     for (Cell cell: pg.getCells()) {
       if (cell.getKey().equals(key)) {
         return;
       }
-      if (cell.getKey().compareTo(key) > 0 && cell.getLeftChild() != 0) {
-        Page chld = pager.get(cell.getLeftChild());
-        chld.init(pg);
-        cur.setPage(chld);
-        moveTo(key);
+      if (key.compareTo(cell.getKey()) < 0) {
+        if (cell.getLeftChild() != 0) {
+          Page chld = pager.get(cell.getLeftChild());
+          chld.init(pg);
+          cur.setPage(chld);
+          moveTo(key);
+        } else {
+          return;
+        }
       }
     }
     if (pg.getRightChild() != 0) {
@@ -229,7 +230,8 @@ public class BTree {
     if (pager.getRoot() == null) {
       pager.setRoot();
     }
-    cur.setPage(pager.getRoot());
-    cur.setIdx(0);
+    Page root = pager.getRoot();
+    root.init(null);
+    cur.setPage(root);
   }
 }

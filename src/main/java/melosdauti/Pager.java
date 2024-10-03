@@ -71,6 +71,7 @@ public class Pager {
     raf.read(data);
     Page page = new Page();
     page.setDisk(data);
+    page.setParent(null);
     page.setPgno(1);
     raf.write(page.getDisk());
     return page;
