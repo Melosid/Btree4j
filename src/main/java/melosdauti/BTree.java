@@ -43,7 +43,6 @@ public class BTree {
     if (parent == null) {
       Page chld;
       if (!pg.isOverfull()) {
-        storage.put(pg.getPgno(), pg);
         return;
       }
       chld = allocate();
