@@ -210,9 +210,13 @@ public class BTree {
 
     Cell cll = get(key);
     if (get(key) != null) {
-      Page pg = moveTo(key, root);
-      pg.getCells().remove(cll);
-      balance(pg);
+      if (cll.getLeftChild() == 0) {
+        Page pg = moveTo(key, root);
+        pg.getCells().remove(cll);
+        balance(pg);
+      } else {
+        // TODO in case Cell is not leaf
+      }
     }
   }
 
