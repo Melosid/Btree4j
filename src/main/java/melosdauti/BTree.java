@@ -183,11 +183,37 @@ public class BTree {
   public void insert(int key, String value) {
     Page root = storage.get(1);
 
+    if (get(key) != null) {
+      delete(key);
+    }
+
     Page pg = moveTo(key, root);
-    Cell cll = new Cell(0, key, value);
-    pg.getCells().add(cll);
+    pg.getCells().add(new Cell(0, key, value));
     Collections.sort(pg.getCells());
     balance(pg);
+  }
+
+  public Cell get(int key) {
+    Page root = storage.get(1);
+
+    Page pg = moveTo(key, root);
+    for (Cell c : pg.getCells()) {
+      if (key == c.getKey()) {
+        return c;
+      }
+    }
+    return null;
+  }
+
+  public void delete(int key) {
+    Page root = storage.get(1);
+
+    Cell cll = get(key);
+    if (get(key) != null) {
+      Page pg = moveTo(key, root);
+      pg.getCells().remove(cll);
+      balance(pg);
+    }
   }
 
   public Page moveTo(int key, Page root) {

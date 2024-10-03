@@ -14,8 +14,26 @@ public class Main {
       bTree.insert(key, data);
     }
 
-    // testing
+    // test insert
     int totalCells = 0;
+    for (int i = 1; i <= bTree.storage.size(); i++) {
+      System.out.println("i: " + i);
+      Page pg = bTree.storage.get(i);
+      System.out.println("pgno: " + pg.getPgno());
+      System.out.println("cells: " + pg.getCells());
+      totalCells += pg.getCells().size();
+      System.out.println("rightchild: " + pg.getRightChild());
+    }
+    System.out.println("totalCells: " + totalCells);
+
+    // test get
+    System.out.println("get key 17: " + bTree.get(17));
+    System.out.println("delete key 17: ");
+    bTree.delete(17);
+    System.out.println("update key 4: ");
+    bTree.insert(4, "My updated string with key 4");
+
+    totalCells = 0;
     for (int i = 1; i <= bTree.storage.size(); i++) {
       System.out.println("i: " + i);
       Page pg = bTree.storage.get(i);
