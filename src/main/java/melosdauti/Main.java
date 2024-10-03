@@ -20,7 +20,7 @@ public class Main {
 
     int totalCells = 0;
     Pager pager = new Pager(fp);
-    for (int i = 1; i <= 15; i++) {
+    for (int i = 1; i <= 30; i++) {
       System.out.println("i: " + i);
       Page pg = pager.get(i);
       pg.readDisk();

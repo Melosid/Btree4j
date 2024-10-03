@@ -14,20 +14,16 @@ public class BTree {
   static final int NB = NN * 2 + 1;
 
   private final Pager pager;
-  private final Cursor cur;
 
   public BTree(String fp) throws IOException {
     pager = new Pager(fp);
     pager.reset();
-    cur = new Cursor();
     if (!pager.getZero()) {
       pager.setZero();
     }
-    moveToRoot();
   }
 
-  public void balance() throws IOException {
-    Page pg = cur.getPage();
+  public void balance(Page pg) throws IOException {
     Page parent = pg.getParent();
     int i, j, k;
     int idx;
@@ -117,6 +113,7 @@ public class BTree {
         cells.getLast().setLeftChild(old.getRightChild());
       }
     }
+    Collections.sort(cells);
 
     int subtotal;
 
@@ -177,61 +174,44 @@ public class BTree {
     for (Page page: pgNew) {
       pager.save(page);
     }
-    pager.save(parent);
-    cur.setPage(parent);
-    balance();
+    balance(parent);
   }
 
   public void insert(String key, String value) throws IOException {
-    moveToRoot();
-    moveTo(key);
+    if (pager.getRoot() == null) {
+      pager.setRoot();
+    }
 
-    Page pg = cur.getPage();
+    Page root = pager.getRoot();
+    root.init(null);
+
+    Page pg = moveTo(key, root);
     Cell cll = new Cell(0, key, value);
     pg.getCells().add(cll);
     Collections.sort(pg.getCells());
-    balance();
+    balance(pg);
   }
 
-  public void delete(String key) throws IOException {
-    moveToRoot();
-    moveTo(key);
-    // ...
-    balance();
-  }
-
-  public void moveTo(String key) throws IOException {
-    Page pg = cur.getPage();
-
-    for (Cell cell: pg.getCells()) {
+  public Page moveTo(String key, Page root) throws IOException {
+    for (Cell cell: root.getCells()) {
       if (cell.getKey().equals(key)) {
-        return;
+        return root;
       }
       if (key.compareTo(cell.getKey()) < 0) {
         if (cell.getLeftChild() != 0) {
           Page chld = pager.get(cell.getLeftChild());
-          chld.init(pg);
-          cur.setPage(chld);
-          moveTo(key);
+          chld.init(root);
+          moveTo(key, chld);
         } else {
-          return;
+          return root;
         }
       }
     }
-    if (pg.getRightChild() != 0) {
-      Page chld = pager.get(pg.getRightChild());
-      chld.init(pg);
-      cur.setPage(chld);
-      moveTo(key);
+    if (root.getRightChild() != 0) {
+      Page chld = pager.get(root.getRightChild());
+      chld.init(root);
+      moveTo(key, chld);
     }
-  }
-
-  private void moveToRoot() throws IOException {
-    if (pager.getRoot() == null) {
-      pager.setRoot();
-    }
-    Page root = pager.getRoot();
-    root.init(null);
-    cur.setPage(root);
+    return root;
   }
 }
