@@ -1,10 +1,6 @@
 package melosdauti;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import lombok.Data;
 
@@ -30,13 +26,6 @@ public class Page implements Comparable<Page> {
   private List<Cell> cells = new ArrayList<>();
 
   public void init(Page prnt) {
-    if (parent != null) {
-      return;
-    }
-    if (isInit == 1) {
-      return;
-    }
-
     parent = prnt;
     isInit = 1;
   }
@@ -46,7 +35,6 @@ public class Page implements Comparable<Page> {
     for (Cell cell : cells) {
       sz += cell.size();
     }
-    System.out.println("size: " + sz);
     return sz;
   }
 
@@ -54,7 +42,7 @@ public class Page implements Comparable<Page> {
     return size() > USABLE_SPACE;
   }
 
-  public int bFree() {
+  public int freeBytes() {
     return PAGE_SIZE - size();
   }
 

@@ -36,12 +36,9 @@ public class BTree {
     int[] cntNew = new int[NB + 1];
     List<Page> pgNew = new ArrayList<>();
 
-    if (!pg.isOverfull() && pg.bFree() < PAGE_SIZE / 2 && pg.getCells().size() >= 2) {
-      System.out.println("no need to balance");
-      storage.put(pg.getPgno(), pg);
+    if (!pg.isOverfull() && pg.freeBytes() < PAGE_SIZE / 2 && pg.getCells().size() >= 2) {
       return;
     }
-    System.out.println("need to balance");
 
     if (parent == null) {
       Page chld;
@@ -53,7 +50,6 @@ public class BTree {
       chld.setCells(new ArrayList<>(pg.getCells()));
       chld.setRightChild(pg.getRightChild());
       chld.setParent(pg);
-      chld.setIsInit(1);
       pg.getCells().clear();
       pg.setRightChild(chld.getPgno());
       pg.setParent(parent);
@@ -83,7 +79,7 @@ public class BTree {
         } else {
           Page lChld = storage.get(pgnoLChld);
           if (lChld != null) {
-            lChld.init(parent);
+            lChld.setParent(parent);
             pgOld.add(i, lChld);
           }
         }
@@ -94,7 +90,7 @@ public class BTree {
         } else {
           Page rChld = storage.get(pgnoRChld);
           if (rChld != null) {
-            rChld.init(parent);
+            rChld.setParent(parent);
             pgOld.add(i, rChld);
           }
         }
@@ -146,7 +142,6 @@ public class BTree {
       } else {
         n = allocate();
       }
-      n.setIsInit(1);
       pgNew.add(n);
     }
 
@@ -188,7 +183,6 @@ public class BTree {
 
   public void insert(String key, String value) {
     Page root = storage.get(1);
-    root.init(null);
 
     Page pg = moveTo(key, root);
     Cell cll = new Cell(0, key, value);
@@ -202,11 +196,11 @@ public class BTree {
       if (cell.getKey().equals(key)) {
         return root;
       }
-      if (key.compareTo(cell.getKey()) < 0) {
+      if (Integer.valueOf(key).compareTo(Integer.valueOf(cell.getKey())) < 0) {
         if (cell.getLeftChild() != 0) {
           Page chld = storage.get(cell.getLeftChild());
-          chld.init(root);
-          moveTo(key, chld);
+          chld.setParent(root);
+          return moveTo(key, chld);
         } else {
           return root;
         }
@@ -214,9 +208,10 @@ public class BTree {
     }
     if (root.getRightChild() != 0) {
       Page chld = storage.get(root.getRightChild());
-      chld.init(root);
-      moveTo(key, chld);
+      chld.setParent(root);
+      return moveTo(key, chld);
+    } else {
+      return root;
     }
-    return root;
   }
 }
