@@ -3,27 +3,28 @@ package melosdauti;
 import static melosdauti.Page.PAGE_SIZE;
 import static melosdauti.Page.USABLE_SPACE;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class BTree {
+
   static final int NN = 1;
   static final int NB = NN * 2 + 1;
 
-  private final Pager pager;
+  public Map<Integer, Page> storage = new HashMap();
 
-  public BTree(String fp) throws IOException {
-    pager = new Pager(fp);
-    pager.reset();
-    if (!pager.getZero()) {
-      pager.setZero();
-    }
+  public BTree() {
+    Page root = new Page();
+    root.setPgno(1);
+    root.setParent(null);
+    storage.put(1, root);
   }
 
-  public void balance(Page pg) throws IOException {
+  public void balance(Page pg) {
     Page parent = pg.getParent();
     int i, j, k;
     int idx;
@@ -37,7 +38,7 @@ public class BTree {
 
     if (!pg.isOverfull() && pg.bFree() < PAGE_SIZE / 2 && pg.getCells().size() >= 2) {
       System.out.println("no need to balance");
-      pager.save(pg);
+      storage.put(pg.getPgno(), pg);
       return;
     }
     System.out.println("need to balance");
@@ -45,10 +46,10 @@ public class BTree {
     if (parent == null) {
       Page chld;
       if (!pg.isOverfull()) {
-        pager.save(pg);
+        storage.put(pg.getPgno(), pg);
         return;
       }
-      chld = pager.allocate();
+      chld = allocate();
       chld.setCells(new ArrayList<>(pg.getCells()));
       chld.setRightChild(pg.getRightChild());
       chld.setParent(pg);
@@ -80,7 +81,7 @@ public class BTree {
         if (pgnoLChld == pg.getPgno()) {
           pgOld.add(pg);
         } else {
-          Page lChld = pager.get(pgnoLChld);
+          Page lChld = storage.get(pgnoLChld);
           if (lChld != null) {
             lChld.init(parent);
             pgOld.add(i, lChld);
@@ -91,7 +92,7 @@ public class BTree {
         if (pgnoRChld == pg.getPgno()) {
           pgOld.add(pg);
         } else {
-          Page rChld = pager.get(pgnoRChld);
+          Page rChld = storage.get(pgnoRChld);
           if (rChld != null) {
             rChld.init(parent);
             pgOld.add(i, rChld);
@@ -102,7 +103,7 @@ public class BTree {
       }
     }
 
-    for (i = 0; i < pgOld.size(); i++ ) {
+    for (i = 0; i < pgOld.size(); i++) {
       Page old = pgOld.get(i);
       for (j = 0; j < old.getCells().size(); j++) {
         cells.add(old.getCells().get(j));
@@ -143,12 +144,11 @@ public class BTree {
         Page o = pgOld.get(i);
         n.setPgno(o.getPgno());
       } else {
-        n = pager.allocate();
+        n = allocate();
       }
       n.setIsInit(1);
       pgNew.add(n);
     }
-
 
     j = 0;
     for (i = 0; i < pgNew.size(); i++) {
@@ -173,18 +173,21 @@ public class BTree {
       parent.getCells().get(nxDiv).setLeftChild(pgNew.getLast().getPgno());
     }
 
-    for (Page page: pgNew) {
-      pager.save(page);
+    for (Page page : pgNew) {
+      storage.put(page.getPgno(), page);
     }
     balance(parent);
   }
 
-  public void insert(String key, String value) throws IOException {
-    if (pager.getRoot() == null) {
-      pager.setRoot();
-    }
+  public Page allocate() {
+    Page page = new Page();
+    page.setPgno(storage.size() + 1);
+    storage.put(page.getPgno(), page);
+    return page;
+  }
 
-    Page root = pager.getRoot();
+  public void insert(String key, String value) {
+    Page root = storage.get(1);
     root.init(null);
 
     Page pg = moveTo(key, root);
@@ -194,14 +197,14 @@ public class BTree {
     balance(pg);
   }
 
-  public Page moveTo(String key, Page root) throws IOException {
-    for (Cell cell: root.getCells()) {
+  public Page moveTo(String key, Page root) {
+    for (Cell cell : root.getCells()) {
       if (cell.getKey().equals(key)) {
         return root;
       }
       if (key.compareTo(cell.getKey()) < 0) {
         if (cell.getLeftChild() != 0) {
-          Page chld = pager.get(cell.getLeftChild());
+          Page chld = storage.get(cell.getLeftChild());
           chld.init(root);
           moveTo(key, chld);
         } else {
@@ -210,7 +213,7 @@ public class BTree {
       }
     }
     if (root.getRightChild() != 0) {
-      Page chld = pager.get(root.getRightChild());
+      Page chld = storage.get(root.getRightChild());
       chld.init(root);
       moveTo(key, chld);
     }
