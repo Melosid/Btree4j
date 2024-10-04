@@ -210,14 +210,54 @@ public class BTree {
 
     Cell cll = get(key);
     if (get(key) != null) {
+      Page pg = moveTo(key, root);
       if (cll.getLeftChild() == 0) {
-        Page pg = moveTo(key, root);
         pg.getCells().remove(cll);
         balance(pg);
       } else {
-        // TODO in case Cell is not leaf
+        Page next = moveToNext(cll.getKey(), pg);
+        Cell nxCll = null;
+        for (Cell c : next.getCells()) {
+          if (c.getLeftChild() == 0) {
+            nxCll = c;
+            break;
+          }
+        }
+        pg.getCells().remove(cll);
+        nxCll.setLeftChild(cll.getLeftChild());
       }
     }
+  }
+
+  public Page moveToNext(int key, Page root) {
+    Cell nx = null;
+    for (Cell c : root.getCells()) {
+      if (c.getKey() > key) {
+        nx = c;
+      }
+      if (c.getKey() > key && c.getLeftChild() == 0) {
+        return root;
+      }
+      if (c.getKey() > key && c.getLeftChild() != 0) {
+        Page lChld = storage.get(c.getLeftChild());
+        lChld.setParent(root);
+        return moveToNext(key, lChld);
+      }
+    }
+    if (nx == null) {
+      if (root.getRightChild() != 0) {
+        Page rChld = storage.get(root.getRightChild());
+        rChld.setParent(root);
+        return moveToNext(key, rChld);
+      } else {
+        if (root.getParent() != null) {
+          return moveToNext(key, root.getParent());
+        } else {
+          return root;
+        }
+      }
+    }
+    return null;
   }
 
   public Page moveTo(int key, Page root) {

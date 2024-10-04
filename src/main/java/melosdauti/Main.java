@@ -21,6 +21,26 @@ public class Main {
     System.out.println("get key 17: " + bTree.get(17));
     System.out.println("delete key 27: ");
     bTree.delete(27);
+    System.out.println("delete key 15: ");
+    bTree.delete(15);
+    System.out.println("delete key 20: ");
+    bTree.delete(20);
+    System.out.println("delete key 14: ");
+    bTree.delete(14);
+    System.out.println("delete key 17: ");
+    bTree.delete(17);
+    System.out.println("delete key 8: ");
+    bTree.delete(8);
+    System.out.println("delete key 26: ");
+    bTree.delete(26);
+    System.out.println("delete key 28: ");
+    bTree.delete(28);
+    System.out.println("delete key 11: ");
+    bTree.delete(11);
+    System.out.println("insert key 11: ");
+    bTree.insert(11, "Newly re-inserted key 11");
+    System.out.println("insert key 8: ");
+    bTree.insert(8, "Newly re-inserted key 8");
 
     totalCells = 0;
     for (int i = 1; i <= bTree.storage.size(); i++) {
