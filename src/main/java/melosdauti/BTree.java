@@ -12,9 +12,12 @@ import java.util.Map;
 
 public class BTree {
 
+  // NN is number of neighbours in each side of the page.
+  // NB number of pages that participate in the balancing operation.
   static final int NN = 1;
   static final int NB = NN * 2 + 1;
 
+  // Storage meant to resemble a file.
   public Map<Integer, Page> storage = new HashMap();
 
   public BTree() {
@@ -24,7 +27,23 @@ public class BTree {
     storage.put(1, root);
   }
 
-  public void balance(Page pg) {
+  /**
+   * Balance page after insert or delete operations
+   *
+   * @param pg
+   */
+  private void balance(Page pg) {
+    /**
+     * i, j, k - iterators
+     * idx - index of current page on the parent
+     * nxDiv - next divider cell
+     * div - divider cells (up to NB cells)
+     * pgOld - pages before balance
+     * pgNew - pages after balance
+     * cells - all cells in pgOld + divider cells
+     * szNew - size of each pgNew
+     * cntNew - first cell of next page on pgNew
+     */
     Page parent = pg.getParent();
     int i, j, k;
     int idx;
@@ -45,6 +64,9 @@ public class BTree {
       if (!pg.isOverfull()) {
         return;
       }
+      /**
+       * If root page is overfull copy the cells to right child and continue.
+       */
       chld = allocate();
       chld.setCells(new ArrayList<>(pg.getCells()));
       chld.setRightChild(pg.getRightChild());
@@ -56,12 +78,18 @@ public class BTree {
       pg = chld;
     }
 
+    /**
+     * Find index of current page on parent.
+     */
     for (idx = 0; idx < parent.getCells().size(); idx++) {
       if (parent.getCells().get(idx).getLeftChild() == pg.getPgno()) {
         break;
       }
     }
 
+    /**
+     * Find divider cells and their respective child pages.
+     */
     nxDiv = idx - NN;
     if (nxDiv + NB > parent.getCells().size()) {
       nxDiv = parent.getCells().size() - NB + 1;
@@ -98,6 +126,9 @@ public class BTree {
       }
     }
 
+    /**
+     * Find all cells on div and pgOld.
+     */
     for (i = 0; i < pgOld.size(); i++) {
       Page old = pgOld.get(i);
       for (j = 0; j < old.getCells().size(); j++) {
@@ -111,8 +142,12 @@ public class BTree {
     }
     Collections.sort(cells);
 
+    /**
+     * Find the best way to share cells between the new pages.
+     * Make sure the pages don't surpass usable space and are occupy preferably over half
+     * of usable space
+     */
     int subtotal;
-
     for (subtotal = k = i = 0; i < cells.size(); i++) {
       subtotal += cells.get(i).size();
       if (subtotal > USABLE_SPACE) {
@@ -133,6 +168,9 @@ public class BTree {
       }
     }
 
+    /**
+     * Allocate new pages. Re-use old ones when possible.
+     */
     for (i = 0; i < k; i++) {
       Page n = new Page();
       if (i < pgOld.size()) {
@@ -144,6 +182,10 @@ public class BTree {
       pgNew.add(n);
     }
 
+    /**
+     * Add cells to new pages and divider cells to parent page accordingly.
+     * Make sure the new divider cells point back to the new pages.
+     */
     j = 0;
     for (i = 0; i < pgNew.size(); i++) {
       Page pgn = pgNew.get(i);
@@ -160,6 +202,11 @@ public class BTree {
       }
     }
 
+    /**
+     * Make sure the last page in the balance points to the original right child.
+     * If last cell on parent was a divider cell, link the right child of page to the last new Page,
+     * otherwise link the last divider cell to the last new Page
+     */
     pgNew.getLast().setRightChild(pgOld.getLast().getRightChild());
     if (nxDiv == parent.getCells().size()) {
       parent.setRightChild(pgNew.getLast().getPgno());
@@ -167,19 +214,33 @@ public class BTree {
       parent.getCells().get(nxDiv).setLeftChild(pgNew.getLast().getPgno());
     }
 
+    /**
+     * Save changes
+     */
     for (Page page : pgNew) {
       storage.put(page.getPgno(), page);
     }
     balance(parent);
   }
 
-  public Page allocate() {
+  /**
+   * Create new Page.
+   *
+   * @return
+   */
+  private Page allocate() {
     Page page = new Page();
     page.setPgno(storage.size() + 1);
     storage.put(page.getPgno(), page);
     return page;
   }
 
+  /**
+   * Insert new entry
+   *
+   * @param key
+   * @param value
+   */
   public void insert(int key, String value) {
     Page root = storage.get(1);
 
@@ -188,11 +249,17 @@ public class BTree {
     }
 
     Page pg = moveTo(key, root);
-    pg.getCells().add(new Cell(0, key, value));
+    pg.getCells().add(new Cell(key, value));
     Collections.sort(pg.getCells());
     balance(pg);
   }
 
+  /**
+   * Get entry by key
+   *
+   * @param key
+   * @return
+   */
   public Cell get(int key) {
     Page root = storage.get(1);
 
@@ -205,6 +272,11 @@ public class BTree {
     return null;
   }
 
+  /**
+   * Delete entry
+   *
+   * @param key
+   */
   public void delete(int key) {
     Page root = storage.get(1);
 
@@ -229,7 +301,14 @@ public class BTree {
     }
   }
 
-  public Page moveToNext(int key, Page root) {
+  /**
+   * Move to next entry
+   *
+   * @param key
+   * @param root
+   * @return Page where entry with next key resides
+   */
+  private Page moveToNext(int key, Page root) {
     Cell nx = null;
     for (Cell c : root.getCells()) {
       if (c.getKey() > key) {
@@ -260,7 +339,14 @@ public class BTree {
     return null;
   }
 
-  public Page moveTo(int key, Page root) {
+  /**
+   * Move to key
+   *
+   * @param key
+   * @param root
+   * @return Page where entry with that key resides
+   */
+  private Page moveTo(int key, Page root) {
     for (Cell cell : root.getCells()) {
       if (key == cell.getKey()) {
         return root;

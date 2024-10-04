@@ -13,7 +13,7 @@ public class Page implements Comparable<Page> {
   static final int USABLE_SPACE = PAGE_SIZE - PAGE_HDR;
   static final int MX_LOCAL_PAYLOAD = (USABLE_SPACE / 4 - CELL_HDR + Integer.BYTES) & ~3;
 
-  // PageHdr
+  // Page Header
   private int rightChild;
 
   private int pgno;

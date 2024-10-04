@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class Cell implements Comparable<Cell> {
 
-  // CellHdr
+  // Cell Header
   private int leftChild;
   private int nKey;
   private int nData;
@@ -15,14 +15,13 @@ public class Cell implements Comparable<Cell> {
   private int key;
   private String data;
 
-  public Cell(int leftChild, int key, String data) {
+  public Cell(int key, String data) {
     nKey = 4;
     nData = data.getBytes().length;
     if (nKey + nData > MX_LOCAL_PAYLOAD) {
       throw new RuntimeException("payload is too large");
     }
 
-    this.leftChild = leftChild;
     this.key = key;
     this.data = data;
   }

@@ -10,7 +10,7 @@ public class BTreeTest {
       20, 30};
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     bTree = new BTree();
     for (int i = 1; i <= KEYS.length; i++) {
       String data = "The string that I want to save with key " + i;
@@ -33,8 +33,6 @@ public class BTreeTest {
     Page rChild = bTree.storage.get(root.getRightChild());
     Cell rChildCell = rChild.getCells().get(0);
     assertThat(rChildCell).isGreaterThan(rootCell);
-
-    System.out.println(rChild);
 
     root.getCells();
   }
